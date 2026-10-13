@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:instagram/screens/login_screen.dart';
-import 'package:instagram/viewModels/auth_viewModel.dart';
+import 'package:instagram/viewModels/auth_view_model.dart';
 import 'package:instagram/utils/helper.dart';
 
 class RegisterScreen extends StatefulWidget {

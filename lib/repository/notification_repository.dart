@@ -29,4 +29,24 @@ class NotificationRepository {
       rethrow;
     }
   }
+
+  Future<ApiResponse> saveFcmToken(String fcmToken) async {
+    try {
+      final response = await notificationApiService.saveFcmToken(fcmToken);
+      helper.handleRequest(response);
+      return response;
+    } on AppException {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> deleteFcmToken(String fcmToken) async {
+    try {
+      final response = await notificationApiService.deleteFcmToken(fcmToken);
+      helper.handleRequest(response);
+      return response;
+    } on AppException {
+      rethrow;
+    }
+  }
 }

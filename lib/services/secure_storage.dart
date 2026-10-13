@@ -16,6 +16,14 @@ class SecureStorage {
     await secureStorage.write(key: "refreshToken", value: refreshToken);
   }
 
+  Future<void> saveFcmToken(String fcmToken) async {
+    await secureStorage.write(key: "fcmToken", value: fcmToken);
+  }
+
+  Future<String?> getFcmToken() async {
+    return await secureStorage.read(key: "fcmToken");
+  }
+
   Future<String?> getAccessToken() async {
     return await secureStorage.read(key: "accessToken");
   }
@@ -27,5 +35,6 @@ class SecureStorage {
   Future<void> clearTokens() async {
     await secureStorage.delete(key: "accessToken");
     await secureStorage.delete(key: "refreshToken");
+    await secureStorage.delete(key: "fcmToken");
   }
 }

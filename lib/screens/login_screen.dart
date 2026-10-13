@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:instagram/screens/home_screen.dart';
+import 'package:instagram/screens/bottom_nav.dart';
 import 'package:instagram/screens/password_update_screen.dart';
 import 'package:instagram/screens/register_screen.dart';
-import 'package:instagram/viewModels/auth_viewModel.dart';
+import 'package:instagram/viewModels/auth_view_model.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -158,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) {
-                                            return const HomeScreen();
+                                            return const MainScreen();
                                           },
                                         ),
                                       );

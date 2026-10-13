@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:instagram/screens/login_screen.dart';
 import 'package:instagram/screens/notification_screen.dart';
-import 'package:instagram/screens/profile_screen.dart';
-import 'package:instagram/viewModels/auth_viewModel.dart';
+import 'package:instagram/viewModels/auth_view_model.dart';
 import 'package:instagram/viewModels/home_viewModel.dart';
 import 'package:instagram/viewModels/notification_view_model.dart';
 
@@ -255,70 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
 
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 50,
-          child: BottomAppBar(
-            color: Colors.white,
-            shape: const CircularNotchedRectangle(),
-            notchMargin: 5.0,
-            clipBehavior: Clip.antiAlias,
-            child: SizedBox(
-              height: 50,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.home, color: Colors.black),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return const HomeScreen();
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.search, color: Colors.black),
-                    onPressed: () {
-                      setState(() {});
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.send_outlined, color: Colors.black),
-                    onPressed: () {
-                      setState(() {});
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.account_circle_outlined,
-                      color: Colors.black,
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return const ProfileScreen();
-                          },
-                        ),
-                      ).then((value) {
-                        homeViewModel.getAllPosts();
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      
     );
   }
 }

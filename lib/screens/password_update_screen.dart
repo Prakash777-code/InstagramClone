@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:instagram/screens/login_screen.dart';
 import 'package:instagram/utils/helper.dart';
-import 'package:instagram/viewModels/auth_viewModel.dart';
+import 'package:instagram/viewModels/auth_view_model.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});

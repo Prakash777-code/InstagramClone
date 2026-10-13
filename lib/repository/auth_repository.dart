@@ -1,6 +1,8 @@
 import 'package:instagram/exceptions/app_exception.dart';
+import 'package:instagram/repository/notification_repository.dart';
 import 'package:instagram/response/api_response.dart';
 import 'package:instagram/services/auth_api_service.dart';
+import 'package:instagram/services/firebase_notification_service.dart';
 import 'package:instagram/utils/helper.dart';
 
 import '../services/secure_storage.dart';
@@ -9,6 +11,8 @@ class AuthRepository {
   final authApiservice = AuthApiService();
   final secureStorage = SecureStorage();
   final helper = Helper();
+  final firebaseNotificationService = FirebaseNotificationService();
+  final notificationRepository = NotificationRepository();
   bool changePasswordRequired = false;
 
   Future<ApiResponse> register(
@@ -39,6 +43,16 @@ class AuthRepository {
           response.data["accessToken"],
           response.data["refreshToken"],
         );
+        print("GETTING FCM TOKEN");
+        try {
+          final fcmToken = await firebaseNotificationService.getToken();
+          if (fcmToken != null) {
+            await notificationRepository.saveFcmToken(fcmToken);
+            await secureStorage.saveFcmToken(fcmToken);
+          }
+        } catch (e) {
+          print(e);
+        }
       }
       return response;
     } on AppException {
@@ -47,7 +61,16 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
-    await secureStorage.clearTokens();
+    final fcmToken = await secureStorage.getFcmToken();
+    try {
+      if (fcmToken != null) {
+        await notificationRepository.deleteFcmToken(fcmToken);
+      }
+    } catch (e) {
+      print(e);
+    } finally {
+      await secureStorage.clearTokens();
+    }
   }
 
   Future<bool> isLoggedIn() async {

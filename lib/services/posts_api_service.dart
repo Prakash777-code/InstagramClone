@@ -37,6 +37,7 @@ class PostsApiService {
         },
       );
     }
+    print("GET POSTS RESONSE: ${response.body}");
     final data = jsonDecode(response.body);
     final postsResponse = PostsResponse.fromJson(data);
     return ApiResponse(statusCode: response.statusCode, data: postsResponse);
@@ -152,6 +153,7 @@ class PostsApiService {
 
   Future<ApiResponse> getUserProfile() async {
     var accessToken = await secureStorage.getAccessToken();
+    print("PROFILE ACCESS TOKEN: $accessToken");
     if (accessToken == null) {
       throw UnauthorizedException("Unauthorised");
     }
@@ -175,6 +177,7 @@ class PostsApiService {
     }
     final data = jsonDecode(response.body);
     final profile = Profile.fromJson(data["data"]);
+    print("GET USER PROFILE:${response.body}");
     return ApiResponse(statusCode: response.statusCode, data: profile);
   }
 }

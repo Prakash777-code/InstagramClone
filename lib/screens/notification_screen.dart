@@ -57,7 +57,7 @@ class _NotificationScreen extends State<NotificationScreen> {
       backgroundColor: Colors.white,
 
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         title: const Text(
           "Notifications",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
@@ -68,6 +68,8 @@ class _NotificationScreen extends State<NotificationScreen> {
 
       body: notificationViewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
+          : notificationViewModel.notificationList.isEmpty
+          ? const Center(child: Text("No notifications yet"))
           : ListView.builder(
               controller: scrollController,
               itemCount: notificationViewModel.notificationList.length + 1,
@@ -154,70 +156,6 @@ class _NotificationScreen extends State<NotificationScreen> {
                 );
               },
             ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 50,
-          child: BottomAppBar(
-            color: Colors.white,
-            shape: const CircularNotchedRectangle(),
-            notchMargin: 5.0,
-            clipBehavior: Clip.antiAlias,
-            child: SizedBox(
-              height: 50,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.home, color: Colors.black),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return const HomeScreen();
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.search, color: Colors.black),
-                    onPressed: () {
-                      setState(() {});
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.send_outlined, color: Colors.black),
-                    onPressed: () {
-                      setState(() {});
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.account_circle_outlined,
-                      color: Colors.black,
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return const ProfileScreen();
-                          },
-                        ),
-                      ).then((value) {
-                        homeViewModel.getAllPosts();
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

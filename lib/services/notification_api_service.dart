@@ -62,4 +62,57 @@ class NotificationApiService {
     final data = json.decode(response.body);
     return ApiResponse(statusCode: response.statusCode, data: data);
   }
+
+  Future<ApiResponse> saveFcmToken(String fcmToken) async {
+    var accessToken = await secureStorage.getAccessToken();
+    var response = await http.post(
+      Uri.parse("${baseUrl}/posts/notifications/fcm-token"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: json.encode({"fcmToken": fcmToken}),
+    );
+    if (response.statusCode == 401) {
+      accessToken = await authApiService.refreshToken();
+      await secureStorage.saveAccessToken(accessToken);
+      response = await http.post(
+        Uri.parse("${baseUrl}/posts/notifications/fcm-token"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
+        body: json.encode({"fcmToken": fcmToken}),
+      );
+    }
+    print("SAVE FCM TOKEN RESPONSE : ${response.body}");
+    final data = json.decode(response.body);
+    return ApiResponse(statusCode: response.statusCode, data: data);
+  }
+
+  Future<ApiResponse> deleteFcmToken(String fcmToken) async {
+    var accessToken = await secureStorage.getAccessToken();
+    var res = await http.delete(
+      Uri.parse("${baseUrl}/posts/notification/fcm"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: json.encode({"fcmToken": fcmToken}),
+    );
+    if (res.statusCode == 401) {
+      accessToken = await authApiService.refreshToken();
+      await secureStorage.saveAccessToken(accessToken);
+      res = await http.delete(
+        Uri.parse("${baseUrl}/posts/notification/fcm"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
+        body: json.encode({"fcmToken": fcmToken}),
+      );
+    }
+    print("DELETE FCM RESPONSE : ${res.body}");
+    return ApiResponse(statusCode: res.statusCode, data: jsonDecode(res.body));
+  }
 }
