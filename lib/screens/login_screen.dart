@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:instagram/screens/bottom_nav.dart';
+import 'package:instagram/screens/forgot_password_screen.dart';
 import 'package:instagram/screens/password_update_screen.dart';
 import 'package:instagram/screens/register_screen.dart';
 import 'package:instagram/viewModels/auth_view_model.dart';
@@ -17,7 +18,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final formKey = GlobalKey<FormState>();
   final authViewModel = AuthViewModel();
-
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -108,7 +108,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
+
                       SizedBox(
                         width: double.infinity,
                         height: 45,
@@ -195,7 +196,30 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 25),
+                      const SizedBox(height: 5),
+
+                      Align(
+                        alignment: Alignment.center,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return const ForgotPasswordScreen();
+                                },
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'Forgot password?',
+                            style: TextStyle(
+                              color: Color(0xFF0095F6),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
 
                       Row(
                         children: [
@@ -250,8 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),

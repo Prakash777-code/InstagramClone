@@ -36,10 +36,21 @@ class FirebaseNotificationService {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       final notification = message.notification;
+
       if (notification != null) {
-        showNotificationBanner(
-          notification.title ?? 'New Notification',
-          notification.body ?? '',
+        await _localNotifications.show(
+          id: notification.hashCode,
+          title: notification.title ?? 'New Notification',
+          body: notification.body ?? '',
+          notificationDetails: const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'high_importance_channel',
+              'High Importance Notifications',
+              channelDescription: 'Notifications for likes and other activity',
+              importance: Importance.max,
+              priority: Priority.high,
+            ),
+          ),
         );
       }
     });

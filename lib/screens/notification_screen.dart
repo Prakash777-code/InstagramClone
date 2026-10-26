@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:instagram/screens/home_screen.dart';
-import 'package:instagram/screens/profile_screen.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:instagram/screens/login_screen.dart';
 import 'package:instagram/utils/helper.dart';
 import 'package:instagram/viewModels/home_viewModel.dart';
 import 'package:instagram/viewModels/notification_view_model.dart';
@@ -19,6 +19,7 @@ class _NotificationScreen extends State<NotificationScreen> {
   final helper = Helper();
   final scrollController = ScrollController();
   final homeViewModel = HomeViewModel();
+  bool isNavigatingToLogin = false;
 
   @override
   void initState() {
@@ -38,7 +39,15 @@ class _NotificationScreen extends State<NotificationScreen> {
   }
 
   void notificationListener() {
-    if (mounted) {
+    if (!mounted) return;
+    if (notificationViewModel.pushToLogin && !isNavigatingToLogin) {
+      isNavigatingToLogin = true;
+      Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+      Fluttertoast.showToast(msg: "Session expired, please login again");
+    } else if (!notificationViewModel.pushToLogin) {
       setState(() {});
     }
   }

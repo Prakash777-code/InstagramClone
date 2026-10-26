@@ -20,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final authViewModel = AuthViewModel();
   final scrollController = ScrollController();
   final notificationViewModel = NotificationViewModel();
+  bool isNavigatingToLogin = false;
 
   @override
   void initState() {
@@ -38,7 +39,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void homeListener() {
-    if (mounted) {
+    if (!mounted) return;
+    if (homeViewModel.pushToLogin && !isNavigatingToLogin) {
+      isNavigatingToLogin = true;    
+      Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+      Fluttertoast.showToast(msg: "Session expired, please login again");
+    } else if (!homeViewModel.pushToLogin) {
       setState(() {});
     }
   }
@@ -253,8 +262,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
-
-      
     );
   }
 }

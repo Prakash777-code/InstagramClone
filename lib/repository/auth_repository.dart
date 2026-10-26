@@ -36,9 +36,12 @@ class AuthRepository {
       if (response.statusCode == 201 &&
           response.data["passwordChangeRequired"] == true) {
         changePasswordRequired = true;
-        await secureStorage.saveRefreshToken(response.data["refreshToken"]);
+        await secureStorage.savePasswordpdateToken(
+          response.data["passwordUpdateToken"],
+        );
       } else {
         changePasswordRequired = false;
+        AuthApiService.isSeesionExpired = false;
         await secureStorage.saveTokens(
           response.data["accessToken"],
           response.data["refreshToken"],
@@ -93,6 +96,54 @@ class AuthRepository {
       );
       helper.handleRequest(response);
       return response;
+    } on AppException {
+      rethrow;
+    }
+  }
+
+  Future<bool> isSeesionExpired() async {
+    final res = AuthApiService.isSeesionExpired;
+    if (!res) {
+      return false;
+    }
+    print("TOKEN CLEARED FOR SESSION EXPIRED");
+    return true;
+  }
+
+  Future<ApiResponse> requestOtp(String email) async {
+    try {
+      final res = await authApiservice.requestOtp(email);
+      helper.handleRequest(res);
+      return res;
+    } on AppException {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> verifyOtp(String email, String otp) async {
+    try {
+      final res = await authApiservice.verifyOtp(email, otp);
+      helper.handleRequest(res);
+      print("SAVING RESET TOKEN");
+      await secureStorage.saveResetToken(res.data["resetToken"]);
+      print("RESET TOKEN SAVED");
+      return res;
+    } on AppException {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> resetPassword(String newPassword) async {
+    try {
+      final resetToken = await secureStorage.getResetToken();
+      print("RESET TOKEN IN AUTH REPOSITORY : ${resetToken}");
+      if (resetToken == null) {
+        print("RESET TOKEN IS NULL");
+        throw UnauthorizedException("Session expired");
+      }
+      final res = await authApiservice.resetPassword(resetToken, newPassword);
+      helper.handleRequest(res);
+      return res;
     } on AppException {
       rethrow;
     }

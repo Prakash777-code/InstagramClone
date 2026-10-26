@@ -20,6 +20,25 @@ class SecureStorage {
     await secureStorage.write(key: "fcmToken", value: fcmToken);
   }
 
+  Future<void> saveResetToken(String resetToekn) async {
+    await secureStorage.write(key: "reset-token", value: resetToekn);
+  }
+
+  Future<void> savePasswordpdateToken(String passwordUpdateToken) async {
+    await secureStorage.write(
+      key: "passwordUpdateToken",
+      value: passwordUpdateToken,
+    );
+  }
+
+  Future<String?> getPasswordUpdateToken() async {
+    return await secureStorage.read(key: "passwordUpdateToken");
+  }
+
+  Future<String?> getResetToken() async {
+    return await secureStorage.read(key: 'reset-token');
+  }
+
   Future<String?> getFcmToken() async {
     return await secureStorage.read(key: "fcmToken");
   }

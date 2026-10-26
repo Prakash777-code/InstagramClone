@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart' hide Notification;
 import 'package:instagram/exceptions/app_exception.dart';
 import 'package:instagram/models/notification_model.dart';
+import 'package:instagram/repository/auth_repository.dart';
 import 'package:instagram/repository/notification_repository.dart';
 import 'package:instagram/models/notification_list.dart';
 import 'package:instagram/services/secure_storage.dart';
 
 class NotificationViewModel extends ChangeNotifier {
   final notificationRepository = NotificationRepository();
+  final authRepository = AuthRepository();
   final secureStorage = SecureStorage();
   bool isLoading = false;
   bool isLoadingMore = false;
+  bool pushToLogin = false;
   String? errorMessage;
   List<NotificationList> notificationList = [];
   int currentPage = 1;
@@ -19,6 +22,7 @@ class NotificationViewModel extends ChangeNotifier {
   bool showNotificationBadge = false;
 
   Future<void> getNotifications() async {
+    if (await authRepository.isSeesionExpired()) return;
     isLoading = true;
     errorMessage = null;
     currentPage = 1;
@@ -33,8 +37,10 @@ class NotificationViewModel extends ChangeNotifier {
       totalNotifications = notificationRes.totalNotifications;
       showNotificationBadge = false;
     } on AppException catch (e) {
+      if (await checkSessionExpired()) return;
       errorMessage = e.toString();
     } catch (e) {
+      if (await checkSessionExpired()) return;
       errorMessage = e.toString();
     } finally {
       isLoading = false;
@@ -43,6 +49,7 @@ class NotificationViewModel extends ChangeNotifier {
   }
 
   Future<void> loadMoreNotifications() async {
+    if (await authRepository.isSeesionExpired()) return;
     if (isLoadingMore) {
       return;
     }
@@ -59,8 +66,10 @@ class NotificationViewModel extends ChangeNotifier {
       notificationList.addAll(notificationRes.notificationList);
       currentPage = nextPage;
     } on AppException catch (e) {
+      if (await checkSessionExpired()) return;
       errorMessage = e.toString();
     } catch (e) {
+      if (await checkSessionExpired()) return;
       errorMessage = e.toString();
     } finally {
       isLoadingMore = false;
@@ -77,5 +86,15 @@ class NotificationViewModel extends ChangeNotifier {
       showNotificationBadge = false;
     }
     notifyListeners();
+  }
+
+  Future<bool> checkSessionExpired() async {
+    final expired = await authRepository.isSeesionExpired();
+    if (expired) {
+      pushToLogin = true;
+      notifyListeners();
+      return true;
+    }
+    return false;
   }
 }

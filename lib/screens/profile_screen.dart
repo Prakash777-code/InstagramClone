@@ -24,6 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final ProfileViewModel profileViewModel = ProfileViewModel();
   final AuthViewModel authViewModel = AuthViewModel();
   final homeViewModel = HomeViewModel();
+  bool isNavigatingToLogin = false;
 
   @override
   void initState() {
@@ -33,7 +34,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void profileListener() {
-    if (mounted) {
+    if (!mounted) return;
+    if (profileViewModel.pushToLogin && !isNavigatingToLogin) {
+      isNavigatingToLogin = true;
+      Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+      Fluttertoast.showToast(msg: "Session expired, please login again");
+    } else if (!profileViewModel.pushToLogin) {
       setState(() {});
     }
   }
