@@ -29,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
           scrollController.position.maxScrollExtent * 0.9) {
+        print("Calling load more from screen");
         homeViewModel.loadNextPage();
       }
     });
@@ -41,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void homeListener() {
     if (!mounted) return;
     if (homeViewModel.pushToLogin && !isNavigatingToLogin) {
-      isNavigatingToLogin = true;    
+      isNavigatingToLogin = true;
       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
@@ -162,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   return const SizedBox(height: 15);
                 }
                 final post = homeViewModel.posts[index];
-
+                final isLiked = homeViewModel.likedIds.contains(post.id);
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -217,11 +218,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             onPressed: homeViewModel.isLiking
                                 ? null
                                 : () async {
-                                    if (post.isLiked) {
+                                    if (isLiked) {
                                       await homeViewModel.unlikePost(post.id);
                                       if (homeViewModel.errorMessage == null) {
                                         post.likes--;
-                                        post.isLiked = false;
                                       } else {
                                         Fluttertoast.showToast(
                                           msg: homeViewModel.errorMessage!,
@@ -231,7 +231,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                       await homeViewModel.likePost(post.id);
                                       if (homeViewModel.errorMessage == null) {
                                         post.likes++;
-                                        post.isLiked = true;
                                       } else {
                                         Fluttertoast.showToast(
                                           msg: homeViewModel.errorMessage!,
@@ -240,11 +239,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     }
                                   },
                             icon: Icon(
-                              post.isLiked
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
+                              isLiked ? Icons.favorite : Icons.favorite_border,
                               size: 28,
-                              color: post.isLiked ? Colors.red : Colors.black,
+                              color: isLiked ? Colors.red : Colors.black,
                             ),
                           ),
 

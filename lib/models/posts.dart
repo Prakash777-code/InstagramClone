@@ -4,7 +4,7 @@ class Posts {
   final String name;
   final String postUrl;
   int likes;
-  bool isLiked;
+
 
   Posts({
     required this.id,
@@ -12,17 +12,15 @@ class Posts {
     required this.name,
     required this.postUrl,
     required this.likes,
-    required this.isLiked,
   });
 
   factory Posts.fromJson(Map<String, dynamic> json) {
     return Posts(
       id: json["id"],
       userId: json["userId"],
-      name: json["name"],
+      name: json["user"]["name"],
       postUrl: json["postUrl"],
-      likes: json["likes"],
-      isLiked: json["isLiked"],
+      likes: json["_count"]["likes"],
     );
   }
 }

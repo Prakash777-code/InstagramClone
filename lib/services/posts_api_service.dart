@@ -10,7 +10,7 @@ import 'package:instagram/models/profile.dart';
 import 'package:http/http.dart' as http;
 
 class PostsApiService {
-  final baseUrl = "https://instagrambackend-aeed.onrender.com";
+  final baseUrl = "http://172.20.10.2:3000";
   final secureStorage = SecureStorage();
   final authApiService = AuthApiService();
 
@@ -179,5 +179,31 @@ class PostsApiService {
     final profile = Profile.fromJson(data["data"]);
     print("GET USER PROFILE:${response.body}");
     return ApiResponse(statusCode: response.statusCode, data: profile);
+  }
+
+  Future<ApiResponse> getLikedPostsIds(List<int> postIds) async {
+    var accessToken = await secureStorage.getAccessToken();
+    var res = await http.post(
+      Uri.parse("${baseUrl}/posts/liked-ids"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: jsonEncode({"postIds": postIds}),
+    );
+    if (res.statusCode == 401) {
+      accessToken = await authApiService.refreshToken();
+      await secureStorage.saveAccessToken(accessToken);
+      res = await http.post(
+        Uri.parse("${baseUrl}/posts/liked-ids"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
+        body: jsonEncode({"postIds": postIds}),
+      );
+    }
+    print("GET LIKED IDS API RESPONSE :${res.body}");
+    return ApiResponse(statusCode: res.statusCode, data: jsonDecode(res.body));
   }
 }

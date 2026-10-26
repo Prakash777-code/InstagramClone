@@ -39,31 +39,41 @@ class PostsRepository {
   }
 
   Future<ApiResponse> likePost(int postId) async {
-    try{
+    try {
       final response = await postsApiService.likePost(postId);
       helper.handleRequest(response);
       return response;
-    } on AppException{
+    } on AppException {
       rethrow;
     }
   }
 
   Future<ApiResponse> unlikePost(int postId) async {
-    try{
+    try {
       final response = await postsApiService.unlikePost(postId);
       helper.handleRequest(response);
       return response;
-    } on AppException{
+    } on AppException {
       rethrow;
     }
   }
 
   Future<ApiResponse> getUserProfile() async {
-    try{
+    try {
       final response = await postsApiService.getUserProfile();
       helper.handleRequest(response);
       return response;
-    } on AppException{
+    } on AppException {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> getLikedPostsIds(List<int> postIds) async {
+    try {
+      final res = await postsApiService.getLikedPostsIds(postIds);
+      helper.handleRequest(res);
+      return res;
+    } on AppException {
       rethrow;
     }
   }

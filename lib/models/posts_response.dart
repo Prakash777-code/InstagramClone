@@ -17,4 +17,6 @@ class PostsResponse {
       totalPosts: json["totalPosts"],
     );
   }
+
+
 }

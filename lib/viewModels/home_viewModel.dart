@@ -15,6 +15,7 @@ class HomeViewModel extends ChangeNotifier {
   bool pushToLogin = false;
   String? errorMessage;
   List<Posts> posts = [];
+  Set<int> likedIds = {};
   int currentPage = 1;
   int limit = 5;
   int totalPosts = 0;
@@ -27,12 +28,15 @@ class HomeViewModel extends ChangeNotifier {
     errorMessage = null;
     retry = false;
     currentPage = 1;
+     print("Posts length${posts.length }");
     notifyListeners();
     try {
       final res = await postsRepository.getAllPosts(1, limit);
       final postsResponse = res.data as PostsResponse;
       posts = postsResponse.posts;
-      print("GET POSTS: ${posts.length}");
+      final postIds = posts.map((id) => id.id).toList();
+      final idRes = await postsRepository.getLikedPostsIds(postIds);
+      likedIds = Set<int>.from(idRes.data["data"]);
       totalPosts = postsResponse.totalPosts;
     } on AppException catch (e) {
       if (await checkSessionExpired()) return;
@@ -49,6 +53,8 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   Future<void> loadNextPage() async {
+    print("Load more called");
+   
     if (await checkSessionExpired()) return;
     if (isLoadingMore) {
       return;
@@ -57,16 +63,21 @@ class HomeViewModel extends ChangeNotifier {
       return;
     }
     final nextPage = currentPage + 1;
+    print("POSTS LENGTH: ${posts.length}");
+    print("TOTAL POSTS: $totalPosts");
+    print("CURRENT PAGE: $currentPage");
+    print("IS LOADING MORE: $isLoadingMore");
     isLoadingMore = true;
     errorMessage = null;
     notifyListeners();
     try {
-      print("BEFORE: ${posts.length}");
       final morePosts = await postsRepository.getAllPosts(nextPage, limit);
       final postsResponse = morePosts.data as PostsResponse;
-      print("RECEIVED: ${postsResponse.posts.length}");
-      posts.addAll(postsResponse.posts);
-      print("AFTER: ${posts.length}");
+      final newPosts = postsResponse.posts;
+      posts.addAll(newPosts);
+      final postIds = newPosts.map((id) => id.id).toList();
+      final res = await postsRepository.getLikedPostsIds(postIds);
+      likedIds.addAll(Set<int>.from(res.data["data"]));
       currentPage = nextPage;
     } on AppException catch (e) {
       if (await checkSessionExpired()) return;

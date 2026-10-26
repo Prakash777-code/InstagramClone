@@ -7,7 +7,7 @@ import 'package:instagram/services/auth_api_service.dart';
 import 'package:instagram/services/secure_storage.dart';
 
 class NotificationApiService {
-  final baseUrl = "https://instagrambackend-aeed.onrender.com";
+  final baseUrl = "http://172.20.10.2:3000";
   final secureStorage = SecureStorage();
   final authApiService = AuthApiService();
 
