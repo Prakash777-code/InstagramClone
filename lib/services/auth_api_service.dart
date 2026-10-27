@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:instagram/services/secure_storage.dart';
 
 class AuthApiService {
-  final baseUrl = "http://172.20.10.2:3000";
+  final baseUrl = "https://instagrambackend-aeed.onrender.com";
   //https://instagrambackend-aeed.onrender.com
   final secureStorage = SecureStorage();
   static bool isSeesionExpired = false;

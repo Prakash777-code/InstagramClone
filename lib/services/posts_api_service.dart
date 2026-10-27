@@ -10,7 +10,7 @@ import 'package:instagram/models/profile.dart';
 import 'package:http/http.dart' as http;
 
 class PostsApiService {
-  final baseUrl = "http://172.20.10.2:3000";
+  final baseUrl = "https://instagrambackend-aeed.onrender.com";
   final secureStorage = SecureStorage();
   final authApiService = AuthApiService();
 

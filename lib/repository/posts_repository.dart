@@ -71,6 +71,7 @@ class PostsRepository {
   Future<ApiResponse> getLikedPostsIds(List<int> postIds) async {
     try {
       final res = await postsApiService.getLikedPostsIds(postIds);
+      print("SENDING POSTS IDS :${postIds}");
       helper.handleRequest(res);
       return res;
     } on AppException {

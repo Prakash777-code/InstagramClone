@@ -28,16 +28,16 @@ class HomeViewModel extends ChangeNotifier {
     errorMessage = null;
     retry = false;
     currentPage = 1;
-     print("Posts length${posts.length }");
+    print("Posts length${posts.length}");
     notifyListeners();
     try {
       final res = await postsRepository.getAllPosts(1, limit);
       final postsResponse = res.data as PostsResponse;
+      totalPosts = postsResponse.totalPosts;
       posts = postsResponse.posts;
       final postIds = posts.map((id) => id.id).toList();
       final idRes = await postsRepository.getLikedPostsIds(postIds);
-      likedIds = Set<int>.from(idRes.data["data"]);
-      totalPosts = postsResponse.totalPosts;
+      likedIds = Set<int>.from(idRes.data["likedids"]);
     } on AppException catch (e) {
       if (await checkSessionExpired()) return;
       errorMessage = e.toString();
@@ -54,11 +54,13 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<void> loadNextPage() async {
     print("Load more called");
-   
+
     if (await checkSessionExpired()) return;
     if (isLoadingMore) {
       return;
     }
+    print("POSTS LENGTH: ${posts.length}");
+    print("TOTAL POSTS: $totalPosts");
     if (posts.length >= totalPosts) {
       return;
     }
@@ -73,12 +75,12 @@ class HomeViewModel extends ChangeNotifier {
     try {
       final morePosts = await postsRepository.getAllPosts(nextPage, limit);
       final postsResponse = morePosts.data as PostsResponse;
-      final newPosts = postsResponse.posts;
-      posts.addAll(newPosts);
-      final postIds = newPosts.map((id) => id.id).toList();
-      final res = await postsRepository.getLikedPostsIds(postIds);
-      likedIds.addAll(Set<int>.from(res.data["data"]));
+      posts.addAll(postsResponse.posts);
       currentPage = nextPage;
+      final postIds = postsResponse.posts.map((id) => id.id).toList();
+      final res = await postsRepository.getLikedPostsIds(postIds);
+      likedIds.addAll(Set<int>.from(res.data["likedids"]));
+      print("LIKED IDS IN LOAD NEXT PAGE :${likedIds}");
     } on AppException catch (e) {
       if (await checkSessionExpired()) return;
       errorMessage = e.toString();
@@ -98,6 +100,7 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       await postsRepository.likePost(postId);
+      likedIds.add(postId);
     } on AppException catch (e) {
       if (await checkSessionExpired()) return;
       errorMessage = e.toString();
@@ -117,6 +120,7 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       await postsRepository.unlikePost(postId);
+      likedIds.remove(postId);
     } on AppException catch (e) {
       if (await checkSessionExpired()) return;
       errorMessage = e.toString();
