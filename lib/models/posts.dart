@@ -3,6 +3,7 @@ class Posts {
   final int userId;
   final String name;
   final String postUrl;
+  bool isFollowing;
   int likes;
   bool isLiked;
 
@@ -13,6 +14,7 @@ class Posts {
     required this.postUrl,
     required this.likes,
     required this.isLiked,
+    required this.isFollowing,
   });
 
   factory Posts.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Posts {
       postUrl: json["postUrl"],
       likes: json["likes"],
       isLiked: json["isLiked"],
+      isFollowing: json["isFollowing"],
     );
   }
 }

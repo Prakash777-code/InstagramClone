@@ -13,6 +13,7 @@ class AuthRepository {
   final helper = Helper();
   final firebaseNotificationService = FirebaseNotificationService();
   final notificationRepository = NotificationRepository();
+  static String? userId;
   bool changePasswordRequired = false;
 
   Future<ApiResponse> register(
@@ -40,6 +41,8 @@ class AuthRepository {
           response.data["passwordUpdateToken"],
         );
       } else {
+        await secureStorage.saveUserId(response.data["userId"]);
+        userId = await secureStorage.getLoggedInUserId();
         changePasswordRequired = false;
         AuthApiService.isSeesionExpired = false;
         await secureStorage.saveTokens(

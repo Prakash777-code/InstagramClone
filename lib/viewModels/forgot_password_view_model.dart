@@ -19,7 +19,7 @@ class ForgotPasswordViewModel extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
     try {
-      final res = await authRepository.requestOtp(email.trim());
+      await authRepository.requestOtp(email.trim());
     } on AppException catch (e) {
       errorMessage = e.message;
     } catch (e) {
@@ -45,12 +45,10 @@ class ForgotPasswordViewModel extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
     try {
-      final res = await authRepository.verifyOtp(email, otp);
+      await authRepository.verifyOtp(email, otp);
     } on AppException catch (e) {
-      print("ERROR IN VIEW MODEL :${e}");
       errorMessage = e.message;
     } catch (e) {
-      print("ERROR IN CATCH BLOCK :${e}");
       errorMessage = e.toString();
     } finally {
       isVerifying = false;

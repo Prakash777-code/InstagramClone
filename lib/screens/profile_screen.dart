@@ -5,7 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram/screens/login_screen.dart';
 import 'package:instagram/viewModels/auth_view_model.dart';
-import 'package:instagram/viewModels/home_viewModel.dart';
+import 'package:instagram/viewModels/home_view_model.dart';
 import 'package:instagram/viewModels/profile_view_model.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -122,6 +122,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            (profileViewModel.profile?.followers ?? 0)
+                                .toString(),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Text('Followers'),
+                        ],
+                      ),
+                      const SizedBox(width: 40),
+                      Column(
+                        children: [
+                          Text(
+                            (profileViewModel.profile?.following ?? 0)
+                                .toString(),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Text('Following'),
+                        ],
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 20),
@@ -289,8 +322,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: double.infinity,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey.shade900,
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.broken_image_outlined,
+                                      color: Colors.white54,
+                                      size: 40,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-
                             Positioned(
                               right: 4,
                               bottom: 4,

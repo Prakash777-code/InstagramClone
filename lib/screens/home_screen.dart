@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:instagram/repository/auth_repository.dart';
 import 'package:instagram/screens/login_screen.dart';
 import 'package:instagram/screens/notification_screen.dart';
+import 'package:instagram/services/secure_storage.dart';
 import 'package:instagram/viewModels/auth_view_model.dart';
-import 'package:instagram/viewModels/home_viewModel.dart';
+import 'package:instagram/viewModels/home_view_model.dart';
 import 'package:instagram/viewModels/notification_view_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -29,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
           scrollController.position.maxScrollExtent * 0.9) {
-        homeViewModel.loadNextPage();
+        homeViewModel.loadNextFeed();
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -41,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void homeListener() {
     if (!mounted) return;
     if (homeViewModel.pushToLogin && !isNavigatingToLogin) {
-      isNavigatingToLogin = true;    
+      isNavigatingToLogin = true;
       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
@@ -76,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       return;
     }
-    await homeViewModel.getAllPosts();
+    await homeViewModel.getUserFeed();
   }
 
   @override
@@ -116,6 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ).then((_) {
                         notificationViewModel.hasUnreadNotification();
+                        homeViewModel.getUserFeed();
                       });
                       ;
                     },
@@ -149,9 +152,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               controller: scrollController,
-              itemCount: homeViewModel.posts.length + 1,
+              itemCount: homeViewModel.postFeed.length + 1,
               itemBuilder: (context, index) {
-                if (index == homeViewModel.posts.length) {
+                if (index == homeViewModel.postFeed.length) {
                   if (homeViewModel.isLoadingMore) {
                     return const Padding(
                       padding: EdgeInsets.symmetric(vertical: 15),
@@ -161,8 +164,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   return const SizedBox(height: 15);
                 }
-                final post = homeViewModel.posts[index];
-
+                final post = homeViewModel.postFeed[index];
+                final isLiked = homeViewModel.likedIds.contains(post.id);
+                final isFollowing = homeViewModel.followingId.contains(
+                  post.userId,
+                );
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -177,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             radius: 18,
                             backgroundColor: Colors.grey.shade300,
                             child: Text(
-                              post.name[0].toUpperCase(),
+                              post.userName[0].toUpperCase(),
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
@@ -186,12 +192,71 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(width: 10),
                           Text(
-                            post.name,
+                            post.userName,
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          const SizedBox(width: 8),
+                          if (post.userId.toString() != AuthRepository.userId)
+                            GestureDetector(
+                              onTap: homeViewModel.isFollowingLoading
+                                  ? null
+                                  : () async {
+                                      if (isFollowing) {
+                                        homeViewModel.updateFollowingStatus(
+                                          post.userId,
+                                          false,
+                                        );
+                                        await homeViewModel.unFollow(
+                                          post.userId,
+                                        );
+                                        if (homeViewModel.errorMessage !=
+                                            null) {
+                                          return;
+                                        }
+                                      } else {
+                                        homeViewModel.updateFollowingStatus(
+                                          post.userId,
+                                          true,
+                                        );
+                                        await homeViewModel.follow(post.userId);
+                                        if (homeViewModel.errorMessage !=
+                                            null) {
+                                          return;
+                                        }
+                                      }
+                                    },
+                              child: Container(
+                                margin: const EdgeInsets.only(left: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isFollowing
+                                      ? Colors.white
+                                      : Colors.blue,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: isFollowing
+                                        ? Colors.black
+                                        : Colors.blue,
+                                  ),
+                                ),
+                                child: Text(
+                                  isFollowing ? "Following" : "Follow",
+                                  style: TextStyle(
+                                    color: isFollowing
+                                        ? Colors.black
+                                        : Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -217,11 +282,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             onPressed: homeViewModel.isLiking
                                 ? null
                                 : () async {
-                                    if (post.isLiked) {
+                                    if (isLiked) {
                                       await homeViewModel.unlikePost(post.id);
                                       if (homeViewModel.errorMessage == null) {
                                         post.likes--;
-                                        post.isLiked = false;
                                       } else {
                                         Fluttertoast.showToast(
                                           msg: homeViewModel.errorMessage!,
@@ -231,7 +295,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                       await homeViewModel.likePost(post.id);
                                       if (homeViewModel.errorMessage == null) {
                                         post.likes++;
-                                        post.isLiked = true;
                                       } else {
                                         Fluttertoast.showToast(
                                           msg: homeViewModel.errorMessage!,
@@ -240,11 +303,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     }
                                   },
                             icon: Icon(
-                              post.isLiked
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
+                              isLiked ? Icons.favorite : Icons.favorite_border,
                               size: 28,
-                              color: post.isLiked ? Colors.red : Colors.black,
+                              color: isLiked ? Colors.red : Colors.black,
                             ),
                           ),
 

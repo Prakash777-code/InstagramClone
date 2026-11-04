@@ -31,6 +31,14 @@ class SecureStorage {
     );
   }
 
+  Future<void> saveUserId(int userId) async {
+    await secureStorage.write(key: "userId", value: userId.toString());
+  }
+
+  Future<String?> getLoggedInUserId() async {
+    return await secureStorage.read(key: "userId");
+  }
+
   Future<String?> getPasswordUpdateToken() async {
     return await secureStorage.read(key: "passwordUpdateToken");
   }
@@ -55,5 +63,6 @@ class SecureStorage {
     await secureStorage.delete(key: "accessToken");
     await secureStorage.delete(key: "refreshToken");
     await secureStorage.delete(key: "fcmToken");
+    await secureStorage.delete(key: "userId");
   }
 }

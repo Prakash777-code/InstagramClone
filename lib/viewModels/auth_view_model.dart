@@ -41,7 +41,6 @@ class AuthViewModel extends ChangeNotifier {
         changePasswordRequired = false;
         isLoggedIn = true;
       }
-      print("PASSWORD CHNAGE REQUIRED : ${changePasswordRequired}");
     } on AppException catch (e) {
       errorMessage = e.toString();
     } catch (e) {

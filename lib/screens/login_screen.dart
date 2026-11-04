@@ -201,16 +201,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       Align(
                         alignment: Alignment.center,
                         child: TextButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return const ForgotPasswordScreen();
+                          onPressed: authViewModel.isLoading
+                              ? null
+                              : () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return const ForgotPasswordScreen();
+                                      },
+                                    ),
+                                  );
                                 },
-                              ),
-                            );
-                          },
                           child: const Text(
                             'Forgot password?',
                             style: TextStyle(
@@ -253,16 +255,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
                           GestureDetector(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return const RegisterScreen();
+                            onTap: authViewModel.isLoading
+                                ? null
+                                : () {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return const RegisterScreen();
+                                        },
+                                      ),
+                                    );
                                   },
-                                ),
-                              );
-                            },
                             child: const Text(
                               'Sign up',
                               style: TextStyle(

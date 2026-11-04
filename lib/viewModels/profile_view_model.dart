@@ -20,7 +20,6 @@ class ProfileViewModel extends ChangeNotifier {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
-
     try {
       final res = await postsRepository.getUserProfile();
       profile = res.data;
@@ -88,4 +87,5 @@ class ProfileViewModel extends ChangeNotifier {
     }
     return false;
   }
+
 }
