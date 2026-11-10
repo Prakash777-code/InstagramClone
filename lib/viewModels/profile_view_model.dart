@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:instagram/exceptions/app_exception.dart';
 import 'package:instagram/models/profile.dart';
+import 'package:instagram/models/profile_preview_response.dart';
 import 'package:instagram/repository/auth_repository.dart';
 import 'package:instagram/repository/posts_repository.dart';
 
@@ -10,10 +11,12 @@ class ProfileViewModel extends ChangeNotifier {
   final postsRepository = PostsRepository();
   final authRepository = AuthRepository();
   bool isLoading = false;
+  bool isFollowingLoader = false;
   bool buttonLoader = false;
   bool pushToLogin = false;
   String? errorMessage;
   Profile? profile;
+  ProfilePreviewResponse? profilePreview;
 
   Future<void> getUserProfile() async {
     if (await authRepository.isSeesionExpired()) return;
@@ -88,4 +91,61 @@ class ProfileViewModel extends ChangeNotifier {
     return false;
   }
 
+  Future<void> getProfilebyId(int profileId) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+    try {
+      final res = await postsRepository.getProfilePreview(profileId);
+      profilePreview = res.data;
+    } on AppException catch (e) {
+      if (await checkSessionExpired()) return;
+      errorMessage = e.toString();
+    } catch (e) {
+      if (await checkSessionExpired()) return;
+      errorMessage = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> follow(int profileId) async {
+    if (isFollowingLoader) return;
+    isFollowingLoader = true;
+    errorMessage = null;
+    notifyListeners();
+    try {
+      await postsRepository.follow(profileId);
+    } on AppException catch (e) {
+      if (await checkSessionExpired()) return;
+      errorMessage = e.message;
+    } catch (e) {
+      if (await checkSessionExpired()) return;
+      errorMessage = e.toString();
+      notifyListeners();
+    } finally {
+      isFollowingLoader = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> unfollow(int profileId) async {
+    if (isFollowingLoader) return;
+    isFollowingLoader = true;
+    errorMessage = null;
+    notifyListeners();
+    try {
+      await postsRepository.unFollow(profileId);
+    } on AppException catch (e) {
+      if (await checkSessionExpired()) return;
+      errorMessage = e.message;
+    } catch (e) {
+      if (await checkSessionExpired()) return;
+      errorMessage = e.toString();
+    } finally {
+      isFollowingLoader = false;
+      notifyListeners();
+    }
+  }
 }

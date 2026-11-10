@@ -16,6 +16,7 @@ class HomeViewModel extends ChangeNotifier {
   bool retry = false;
   bool pushToLogin = false;
   bool isFollowingLoading = false;
+  bool isThrottleException = false;
   String? errorMessage;
   List<Posts> posts = [];
   List<UserFeed> postFeed = [];
@@ -139,6 +140,13 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       await postsRepository.follow(profileId);
+    } on ThrottleException {
+      isThrottleException = true;
+      updateFollowingStatus(profileId, false);
+    } on ConflictException {
+      print("SYNCHRONISING FOLLOWING IDs");
+      final userIds = postFeed.map((ids) => ids.userId).toList();
+      await synchroniseFollowingIds(userIds);
     } on AppException catch (e) {
       errorMessage = e.message;
     } catch (e) {
@@ -156,6 +164,12 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       await postsRepository.unFollow(profileId);
+    } on ThrottleException {
+      isThrottleException = true;
+      updateFollowingStatus(profileId, true);
+    } on ConflictException {
+      final userIds = postFeed.map((ids) => ids.userId).toList();
+      await synchroniseFollowingIds(userIds);
     } on AppException catch (e) {
       errorMessage = e.message;
     } catch (e) {
@@ -180,7 +194,8 @@ class HomeViewModel extends ChangeNotifier {
       postFeed = feedRes.userFeed;
       totalPosts = feedRes.totalPosts;
       final postIds = feedRes.userFeed.map((id) => id.id).toList();
-      await postsRepository.getLikedIds(postIds);
+      final idRes = await postsRepository.getLikedIds(postIds);
+      likedIds = List<int>.from(idRes.data);
       final userIds = feedRes.userFeed.map((post) => post.userId).toList();
       final userIdRes = await postsRepository.getFollowingIds(userIds);
       followingId = List<int>.from(userIdRes.data);
@@ -200,7 +215,7 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<void> loadNextFeed() async {
     if (await checkSessionExpired()) return;
-    if (isLoadingMore) {
+    if (isLoading || isLoadingMore) {
       return;
     }
     if (postFeed.length >= totalPosts) {
@@ -219,6 +234,7 @@ class HomeViewModel extends ChangeNotifier {
       final postIds = feedRes.userFeed.map((id) => id.id).toList();
       final idRes = await postsRepository.getLikedIds(postIds);
       likedIds.addAll(List<int>.from(idRes.data));
+      likedIds = likedIds.toSet().toList();
       final userIds = feedRes.userFeed.map((id) => id.userId).toList();
       final userIdRes = await postsRepository.getFollowingIds(userIds);
       followingId.addAll(List<int>.from(userIdRes.data));
@@ -242,5 +258,20 @@ class HomeViewModel extends ChangeNotifier {
       followingId.remove(userId);
     }
     notifyListeners();
+  }
+
+  Future<void> synchroniseFollowingIds(List<int> userIds) async {
+    try {
+      final res = await postsRepository.getFollowingIds(userIds);
+      followingId
+        ..clear()
+        ..addAll(res.data);
+    } on AppException catch (e) {
+      errorMessage = e.message;
+    } catch (e) {
+      errorMessage = e.toString();
+    } finally {
+      notifyListeners();
+    }
   }
 }

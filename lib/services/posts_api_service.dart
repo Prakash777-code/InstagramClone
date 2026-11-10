@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:instagram/exceptions/app_exception.dart';
 import 'package:instagram/models/posts_response.dart';
+import 'package:instagram/models/profile_preview_response.dart';
+import 'package:instagram/models/search_user_response.dart';
 import 'package:instagram/models/user_feed_response.dart';
 import 'package:instagram/response/api_response.dart';
 import 'package:instagram/services/auth_api_service.dart';
@@ -333,5 +335,61 @@ class PostsApiService {
       statusCode: res.statusCode,
       data: jsonDecode(res.body)["followingIds"],
     );
+  }
+
+  Future<ApiResponse> getProfilePreview(int profileId) async {
+    var accessToken = await secureStorage.getAccessToken();
+    var res = await http.get(
+      Uri.parse("${baseUrl}/posts/profile/${profileId}"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+    if (res.statusCode == 401) {
+      accessToken = await authApiService.refreshToken();
+      await secureStorage.saveAccessToken(accessToken);
+      res = await http.get(
+        Uri.parse("${baseUrl}/posts/profile/${profileId}"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
+      );
+    }
+    print("PROFILE PREVIEW API RESPONSE :${res.body}");
+    final data = jsonDecode(res.body);
+    final profilePreview = ProfilePreviewResponse.fromJson(data);
+    return ApiResponse(statusCode: res.statusCode, data: profilePreview);
+  }
+
+  Future<ApiResponse> searchUsers(String query, int page, int limit) async {
+    var accessToken = await secureStorage.getAccessToken();
+    var res = await http.get(
+      Uri.parse(
+        "${baseUrl}/posts/search-user?query=${query}&page=${page}&limit=${limit}",
+      ),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+    if (res.statusCode == 401) {
+      accessToken = await authApiService.refreshToken();
+      await secureStorage.saveAccessToken(accessToken);
+      res = await http.get(
+        Uri.parse(
+          "${baseUrl}/posts/search-user?query=${query}&page=${page}&limit=${limit}",
+        ),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
+      );
+    }
+    print("SEARCH USERS API RESPONSE :${res.body}");
+    final data = jsonDecode(res.body);
+    final users = SearchUserResponse.fromJson(data);
+    return ApiResponse(statusCode: res.statusCode, data: users);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:instagram/screens/home_screen.dart';
 import 'package:instagram/screens/profile_screen.dart';
+import 'package:instagram/screens/search_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -14,16 +15,8 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const Scaffold(
-      body: Center(
-        child: Text('Search'),
-      ),
-    ),
-    const Scaffold(
-      body: Center(
-        child: Text('Messages'),
-      ),
-    ),
+    const SearchScreen(),
+    const Scaffold(body: Center(child: Text('Messages'))),
     const ProfileScreen(),
   ];
 
@@ -41,14 +34,8 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(
             icon: Icon(Icons.send_outlined),
             label: 'Messages',

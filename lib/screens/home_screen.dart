@@ -3,7 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:instagram/repository/auth_repository.dart';
 import 'package:instagram/screens/login_screen.dart';
 import 'package:instagram/screens/notification_screen.dart';
-import 'package:instagram/services/secure_storage.dart';
+import 'package:instagram/screens/profile_preview_screen.dart';
 import 'package:instagram/viewModels/auth_view_model.dart';
 import 'package:instagram/viewModels/home_view_model.dart';
 import 'package:instagram/viewModels/notification_view_model.dart';
@@ -120,7 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         notificationViewModel.hasUnreadNotification();
                         homeViewModel.getUserFeed();
                       });
-                      ;
                     },
                     icon: const Icon(
                       Icons.favorite_border,
@@ -179,23 +178,47 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: Row(
                         children: [
-                          CircleAvatar(
-                            radius: 18,
-                            backgroundColor: Colors.grey.shade300,
-                            child: Text(
-                              post.userName[0].toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProfilePreviewScreen(
+                                    profileId: post.userId,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: CircleAvatar(
+                              radius: 18,
+                              backgroundColor: Colors.grey.shade300,
+                              child: Text(
+                                post.userName[0].toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Text(
-                            post.userName,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProfilePreviewScreen(
+                                    profileId: post.userId,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              post.userName,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -212,6 +235,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                         await homeViewModel.unFollow(
                                           post.userId,
                                         );
+                                        if (homeViewModel.isThrottleException) {
+                                          Fluttertoast.showToast(
+                                            msg: "Please wait for a moment",
+                                          );
+                                          return;
+                                        }
                                         if (homeViewModel.errorMessage !=
                                             null) {
                                           return;
@@ -222,6 +251,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                           true,
                                         );
                                         await homeViewModel.follow(post.userId);
+                                        if (homeViewModel.isThrottleException) {
+                                          Fluttertoast.showToast(
+                                            msg: "Please wait for a moment",
+                                          );
+                                          return;
+                                        }
                                         if (homeViewModel.errorMessage !=
                                             null) {
                                           return;

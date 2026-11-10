@@ -118,4 +118,24 @@ class PostsRepository {
       rethrow;
     }
   }
+
+  Future<ApiResponse> getProfilePreview(int profileId) async {
+    try {
+      final response = await postsApiService.getProfilePreview(profileId);
+      helper.handleRequest(response);
+      return response;
+    } on AppException {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse> searchUsers(String query, int page, int limit) async {
+    try {
+      final response = await postsApiService.searchUsers(query, page, limit);
+      helper.handleRequest(response);
+      return response;
+    } on AppException {
+      rethrow;
+    }
+  }
 }
