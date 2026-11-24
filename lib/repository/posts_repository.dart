@@ -138,4 +138,14 @@ class PostsRepository {
       rethrow;
     }
   }
+
+  Future<ApiResponse> getUserPosts(int page, int limit) async {
+    try {
+      final response = await postsApiService.getUserPosts(page, limit);
+      helper.handleRequest(response);
+      return response;
+    } on AppException {
+      rethrow;
+    }
+  }
 }

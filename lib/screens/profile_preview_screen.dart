@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:instagram/repository/auth_repository.dart';
-
 import 'package:instagram/viewModels/auth_view_model.dart';
 import 'package:instagram/viewModels/home_view_model.dart';
 import 'package:instagram/viewModels/profile_view_model.dart';
@@ -26,6 +24,7 @@ class _ProfilePreviewState extends State<ProfilePreviewScreen> {
     super.initState();
     profileViewModel.addListener(profileListener);
     profileViewModel.getProfilebyId(widget.profileId);
+    profileViewModel.getUserIdFromStorage();
   }
 
   void profileListener() {
@@ -42,15 +41,10 @@ class _ProfilePreviewState extends State<ProfilePreviewScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = profileViewModel.profilePreview;
-    final posts = profile?.profilePreview ?? [];
     final bool isOwnProfile =
-        widget.profileId.toString() == AuthRepository.userId;
+        widget.profileId.toString() == profileViewModel.userId;
     final bool hasProfile = profile != null;
     final String userName = profile?.name ?? "User";
-    print("Is own ${isOwnProfile}");
-    print("Profile ID: ${widget.profileId}");
-    print("Logged in ID: ${AuthRepository.userId}");
-    print("Is own profile: $isOwnProfile");
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,

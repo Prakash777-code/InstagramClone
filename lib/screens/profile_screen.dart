@@ -25,12 +25,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthViewModel authViewModel = AuthViewModel();
   final homeViewModel = HomeViewModel();
   bool isNavigatingToLogin = false;
+  final scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     profileViewModel.addListener(profileListener);
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent * 0.9) {
+        print("CALLING GET NEXT PAGE FOR USER POSTS");
+        profileViewModel.loadNextPage();
+      }
+    });
+    print("CALLING GET USER POSTS");
     profileViewModel.getUserProfile();
+    profileViewModel.getUserPosts();
   }
 
   void profileListener() {
@@ -96,6 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: profileViewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
+              controller: scrollController,
               child: Column(
                 children: [
                   const SizedBox(height: 20),
@@ -235,6 +246,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             );
                                             await profileViewModel
                                                 .getUserProfile();
+                                            await profileViewModel
+                                                .getUserPosts();
                                           } else {
                                             Fluttertoast.showToast(
                                               msg: profileViewModel
@@ -306,7 +319,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: profileViewModel.profile!.posts.length,
+                      itemCount: profileViewModel.userPostsList.length,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 3,
@@ -314,11 +327,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             mainAxisSpacing: 2,
                           ),
                       itemBuilder: (context, index) {
-                        final post = profileViewModel.profile!.posts[index];
+                        final post = profileViewModel.userPostsList[index];
                         return Stack(
                           children: [
                             Image.network(
-                              post.postUrl,
+                              post.imageUrl,
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: double.infinity,
@@ -387,7 +400,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 );
                                               }
                                             },
-
                                             child: profileViewModel.buttonLoader
                                                 ? const SizedBox(
                                                     width: 20,

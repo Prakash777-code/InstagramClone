@@ -167,21 +167,21 @@ class _NotificationScreen extends State<NotificationScreen> {
                               onPressed: notificationViewModel.isFollowing
                                   ? null
                                   : () async {
+                                      notificationViewModel.toggleFollow(
+                                        notification.senderId,
+                                        false,
+                                      );
                                       if (isFollowing) {
                                         await notificationViewModel.unFollow(
                                           notification.senderId,
                                         );
-                                        notificationViewModel.toggleFollow(
-                                          notification.senderId,
-                                          false,
-                                        );
                                       } else {
-                                        await notificationViewModel.follow(
-                                          notification.senderId,
-                                        );
                                         notificationViewModel.toggleFollow(
                                           notification.senderId,
                                           true,
+                                        );
+                                        await notificationViewModel.follow(
+                                          notification.senderId,
                                         );
                                       }
                                       if (notificationViewModel.errorMessage !=

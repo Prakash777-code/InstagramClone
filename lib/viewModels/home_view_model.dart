@@ -6,10 +6,12 @@ import 'package:instagram/models/user_feed.dart';
 import 'package:instagram/models/user_feed_response.dart';
 import 'package:instagram/repository/auth_repository.dart';
 import 'package:instagram/repository/posts_repository.dart';
+import 'package:instagram/services/secure_storage.dart';
 
 class HomeViewModel extends ChangeNotifier {
   final postsRepository = PostsRepository();
   final authRepository = AuthRepository();
+  final secureStorage = SecureStorage();
   bool isLoading = false;
   bool isLoadingMore = false;
   bool isLiking = false;
@@ -26,6 +28,7 @@ class HomeViewModel extends ChangeNotifier {
   int limit = 5;
   int totalPosts = 0;
   int? likes;
+  String? userId;
 
   Future<void> getAllPosts() async {
     if (await authRepository.isSeesionExpired()) return;
@@ -260,6 +263,15 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateLikeStatus(int postId, bool isLiked){
+    if(isLiked){
+      likedIds.add(postId);
+    } else {
+      likedIds.remove(postId);
+    }
+    notifyListeners();
+  }
+
   Future<void> synchroniseFollowingIds(List<int> userIds) async {
     try {
       final res = await postsRepository.getFollowingIds(userIds);
@@ -273,5 +285,10 @@ class HomeViewModel extends ChangeNotifier {
     } finally {
       notifyListeners();
     }
+  }
+
+  Future<void> getUserIdFromStorage() async {
+    userId = await secureStorage.getLoggedInUserId();
+    print("USER ID IN VM:${userId}");
   }
 }

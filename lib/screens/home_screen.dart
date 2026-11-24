@@ -38,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
       checkUserAuthentication();
     });
     notificationViewModel.hasUnreadNotification();
+    homeViewModel.getUserIdFromStorage();
   }
 
   void homeListener() {
@@ -222,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          if (post.userId.toString() != AuthRepository.userId)
+                          if (post.userId.toString() != homeViewModel.userId)
                             GestureDetector(
                               onTap: homeViewModel.isFollowingLoading
                                   ? null

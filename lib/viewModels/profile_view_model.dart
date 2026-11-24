@@ -4,12 +4,16 @@ import 'package:flutter/foundation.dart';
 import 'package:instagram/exceptions/app_exception.dart';
 import 'package:instagram/models/profile.dart';
 import 'package:instagram/models/profile_preview_response.dart';
+import 'package:instagram/models/user_posts.dart';
+import 'package:instagram/models/user_posts_list.dart';
 import 'package:instagram/repository/auth_repository.dart';
 import 'package:instagram/repository/posts_repository.dart';
+import 'package:instagram/services/secure_storage.dart';
 
 class ProfileViewModel extends ChangeNotifier {
   final postsRepository = PostsRepository();
   final authRepository = AuthRepository();
+  final secureStorage = SecureStorage();
   bool isLoading = false;
   bool isFollowingLoader = false;
   bool buttonLoader = false;
@@ -17,6 +21,13 @@ class ProfileViewModel extends ChangeNotifier {
   String? errorMessage;
   Profile? profile;
   ProfilePreviewResponse? profilePreview;
+  int currentPage = 1;
+  int limit = 9;
+  bool isLoadingMore = false;
+  bool postsLoading = false;
+  int totalPosts = 0;
+  List<UserPostsList> userPostsList = [];
+  String? userId;
 
   Future<void> getUserProfile() async {
     if (await authRepository.isSeesionExpired()) return;
@@ -77,7 +88,7 @@ class ProfileViewModel extends ChangeNotifier {
   }
 
   void removePostLocally(int postId) {
-    profile?.posts.removeWhere((item) => item.id == postId);
+    userPostsList.removeWhere((item) => item.id == postId);
     notifyListeners();
   }
 
@@ -147,5 +158,63 @@ class ProfileViewModel extends ChangeNotifier {
       isFollowingLoader = false;
       notifyListeners();
     }
+  }
+
+  Future<void> getUserPosts() async {
+    print("GET USER POSTS CALLED IN VM");
+    if (postsLoading || isLoadingMore) return;
+    errorMessage = null;
+    postsLoading = true;
+    currentPage = 1;
+    notifyListeners();
+    try {
+      final res = await postsRepository.getUserPosts(currentPage, limit);
+      final data = res.data as UserPosts;
+      userPostsList = data.postlList;
+      totalPosts = data.totalPosts;
+      print("USER POSTS LENGTH :${userPostsList.length}");
+      print("TOTAL USER POSTS :${totalPosts}");
+    } on AppException catch (e) {
+      if (await checkSessionExpired()) return;
+      errorMessage = e.message;
+    } catch (e) {
+      if (await checkSessionExpired()) return;
+      errorMessage = e.toString();
+    } finally {
+      postsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadNextPage() async {
+    print("CALLEDD NEXT PAGE");
+    if (postsLoading || isLoadingMore) return;
+    if (userPostsList.length >= totalPosts) return;
+    int nextPage = currentPage + 1;
+    isLoadingMore = true;
+    errorMessage = null;
+    notifyListeners();
+    try {
+      final res = await postsRepository.getUserPosts(nextPage, limit);
+      final data = res.data as UserPosts;
+      userPostsList.addAll(data.postlList);
+      currentPage = nextPage;
+      print("CUREENT PAGE ${currentPage}");
+      print("USER POSTS LENGTH AFTER NEXT PAGE :${userPostsList.length}");
+    } on AppException catch (e) {
+      if (await checkSessionExpired()) return;
+      errorMessage = e.message;
+    } catch (e) {
+      if (await checkSessionExpired()) return;
+      errorMessage = e.toString();
+    } finally {
+      isLoadingMore = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getUserIdFromStorage() async {
+    userId = await secureStorage.getLoggedInUserId();
+    print("USER ID IN PROFILE VM:${userId}");
   }
 }
